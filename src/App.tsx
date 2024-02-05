@@ -31,24 +31,27 @@ const PhoneComponent: React.FC<{ value: string }> = ({ value }) => (
   <input placeholder="Phone Number" defaultValue={value} type="tel"/>
 );
 
-// Function to select component based on field type
-function getFieldComponent(field: Field) {
-  switch (field.type) {
-    case FieldType.Name:
-      return NameComponent;
-    case FieldType.Phone:
-      return PhoneComponent;
-    default:
-      return () => <div>Unsupported field type</div>;
-  }
+function isNameField(field: Field): field is { type: FieldType.Name; first: string; last: string } {
+  return field.type === FieldType.Name;
 }
 
-// Dynamically render components based on field type
+// Function to determine if a field is a PhoneField
+function isPhoneField(field: Field): field is { type: FieldType.Phone; value: string } {
+  return field.type === FieldType.Phone;
+}
+
+// Dynamically render components based on field type with type checks
 const DynamicFieldRenderer: React.FC<{ fields: Field[] }> = ({ fields }) => (
   <>
     {fields.map((field, index) => {
-      const Component = getFieldComponent(field);
-      return <Component key={index} {...field} />;
+      if (isNameField(field)) {
+        return <NameComponent key={index} {...field} />;
+      } else if (isPhoneField(field)) {
+        return <PhoneComponent key={index} {...field} />;
+      } else {
+        // Handle unsupported field types if necessary
+        return <div key={index}>Unsupported field type</div>;
+      }
     })}
   </>
 );
